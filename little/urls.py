@@ -7,10 +7,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 
-urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'little.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+urlpatterns = patterns(
+    '',
 
     url(r'^admin/', include(admin.site.urls)),
+
+    url(
+        r'^(?P<short_key>[a-z\d]+)/$',
+        'little.views.short_detail',
+        name='short_detail'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
