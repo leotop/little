@@ -1,8 +1,20 @@
+import random
+import string
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
 import crockford
+
+
+API_KEY_LENGTH = 32
+
+
+def generate_key(length):
+    return ''.join(
+        random.choice(string.digits + string.ascii_lowercase)
+        for __ in xrange(length))
 
 
 class ShortManager(models.Manager):
@@ -25,5 +37,17 @@ class Short(models.Model):
 
         return self.image.url
 
+    @property
     def key(self):
         return crockford.b32encode(unicode(self.pk)).lower()
+
+
+class APIKey(models.Model):
+    user = models.ForeignKey(get_user_model())
+    key = models.CharField(max_length=API_KEY_LENGTH, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.key:
+            self.key = generate_key(API_KEY_LENGTH)
+
+        super(APIKey, self).save(*args, **kwargs)

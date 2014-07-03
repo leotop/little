@@ -1,7 +1,10 @@
-from django.http import Http404
+from django.conf import settings
+from django.contrib.sites.models import get_current_site
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 
-from .models import Short
+from .models import APIKey, Short
 
 
 def short_detail(request, short_key):
@@ -14,3 +17,23 @@ def short_detail(request, short_key):
         return redirect(short.destination)
 
     return redirect(short.image.url)
+
+
+def short_create(request):
+    url = request.GET.get('url')
+    api_key = request.GET.get('key')
+    user = APIKey.objects.get(key=api_key).user
+
+    short, __ = Short.objects.get_or_create(
+        destination=url,
+        created_by=user,
+    )
+
+    domain = get_current_site(request).domain
+    short_path = reverse('short_detail', kwargs={'short_key': short.key})
+    short_url = '{scheme}://{domain}{short_path}'.format(
+        scheme=settings.SHORT_SCHEME,
+        domain=domain,
+        short_path=short_path)
+
+    return HttpResponse(short_url, content_type='text/plain')
