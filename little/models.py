@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-import crockford
+import base32_crockford
 
 
 API_KEY_LENGTH = 32
@@ -19,7 +19,7 @@ def generate_key(length):
 
 class ShortManager(models.Manager):
     def get_for_key(self, key):
-        pk = crockford.b32decode(str(key).upper())
+        pk = base32_crockford.decode(key)
         return self.get(pk=pk)
 
 
@@ -39,7 +39,7 @@ class Short(models.Model):
 
     @property
     def key(self):
-        return crockford.b32encode(unicode(self.pk)).lower()
+        return base32_crockford.encode(self.pk)
 
 
 class APIKey(models.Model):
