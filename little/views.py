@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 
-from .models import APIKey, Short
+from .models import APIKey, Short, Visit
 
 
 def short_detail(request, short_key):
@@ -12,6 +12,13 @@ def short_detail(request, short_key):
         short = Short.objects.get_for_key(short_key)
     except Short.DoesNotExist as e:
         raise Http404(e.message)
+
+    Visit.objects.create(
+        short=short,
+        remote_addr=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT'),
+        referrer=request.META.get('HTTP_REFERER'),
+    )
 
     if short.destination:
         return redirect(short.destination)

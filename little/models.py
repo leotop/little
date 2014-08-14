@@ -23,7 +23,8 @@ class ShortManager(models.Manager):
 
 
 class Short(models.Model):
-    key = models.CharField(blank=True, max_length=100, null=True)
+    key = models.CharField(
+        blank=True, db_index=True, max_length=100, null=True)
     destination = models.URLField(blank=True, null=True)
     image = models.ImageField(blank=True, null=True, upload_to='%y/%m/%d/')
     created_by = models.ForeignKey(get_user_model())
@@ -54,3 +55,17 @@ class APIKey(models.Model):
             self.key = generate_key(API_KEY_LENGTH)
 
         super(APIKey, self).save(*args, **kwargs)
+
+
+class Visit(models.Model):
+    short = models.ForeignKey(Short)
+    remote_addr = models.CharField(max_length=15)
+    user_agent = models.TextField(blank=True, null=True)
+    referrer = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ('-created_at', )
+
+    def __unicode__(self):
+        return u"Visit"
