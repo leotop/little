@@ -1,2 +1,7 @@
+*.pyc
 *.sqlite3
+conf
+logs
 media
+static
+little/settings/live.py
