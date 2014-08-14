@@ -7,18 +7,28 @@ from django.shortcuts import redirect
 from .models import APIKey, Short, Visit
 
 
+def _record_visit(request, short):
+    remote_addr = (
+        request.META.get('REMOTE_ADDR') or
+        request.META.get('HTTP_X_REAL_IP') or
+        request.META.get('HTTP_X_FORWARDED_FOR')
+    )
+
+    return Visit.objects.create(
+        short=short,
+        remote_addr=remote_addr,
+        user_agent=request.META.get('HTTP_USER_AGENT'),
+        referrer=request.META.get('HTTP_REFERER'),
+    )
+
+
 def short_detail(request, short_key):
     try:
         short = Short.objects.get_for_key(short_key)
     except Short.DoesNotExist as e:
         raise Http404(e.message)
 
-    Visit.objects.create(
-        short=short,
-        remote_addr=request.META.get('REMOTE_ADDR'),
-        user_agent=request.META.get('HTTP_USER_AGENT'),
-        referrer=request.META.get('HTTP_REFERER'),
-    )
+    _record_visit(request, short)
 
     if short.destination:
         return redirect(short.destination)
