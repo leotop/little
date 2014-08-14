@@ -20,7 +20,7 @@ urlpatterns = patterns(
         name='short_create'),
 
     url(
-        r'^(?P<short_key>[a-z\d]+)/$',
+        r'^(?P<short_key>[^/]+)/$',
         views.short_detail,
         name='short_detail'),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
